@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Crane Jobs">
+<title>Crane Job Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --steel: #1a1d23;
+    --steel-mid: #252930;
+    --steel-light: #2e333d;
+    --panel: #1e2128;
+    --border: #363c48;
+    --yellow: #f5c518;
+    --yellow-dim: #c9a010;
+    --yellow-glow: rgba(245,197,24,0.15);
+    --red: #e63946;
+    --green: #2dc653;
+    --text: #e8eaf0;
+    --text-dim: #8b939f;
+    --text-muted: #596170;
+    --input-bg: #161820;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--steel);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+  }
+
+  .app-header {
+    background: var(--steel-mid);
+    border-bottom: 2px solid var(--yellow);
+    padding: 14px 16px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .app-logo { display: flex; align-items: center; gap: 10px; }
+  .app-logo svg { width: 32px; height: 32px; color: var(--yellow); }
+  .app-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text); line-height: 1;
+  }
+  .app-title span { color: var(--yellow); }
+  .job-count-badge {
+    background: var(--yellow); color: var(--steel);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 13px;
+    padding: 3px 9px; border-radius: 20px; letter-spacing: 0.5px;
+  }
+
+  .tab-nav {
+    display: grid; grid-template-columns: 1fr 1fr;
+    background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    padding: 14px 8px; border: none; background: transparent;
+    color: var(--text-dim);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  .tab-btn.active { color: var(--yellow); border-bottom-color: var(--yellow); background: var(--yellow-glow); }
+  .tab-btn svg { width: 18px; height: 18px; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .form-body { padding: 16px; display: flex; flex-direction: column; gap: 4px; }
+
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--yellow);
+    padding: 18px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
+  .field-label { font-size: 13px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.3px; }
+  .field-label .required { color: var(--yellow); margin-left: 3px; }
+
+  .field-input {
+    width: 100%; background: var(--input-bg);
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); font-family: 'Barlow', sans-serif;
+    font-size: 17px; padding: 13px 14px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none;
+  }
+  .field-input:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px var(--yellow-glow); }
+  .field-input::placeholder { color: var(--text-muted); }
+  .field-input.job-name-input {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; font-weight: 700;
+    border-color: var(--yellow-dim); background: #161a10;
+  }
+  .field-input.job-name-input:focus { border-color: var(--yellow); }
+  textarea.field-input { resize: none; min-height: 88px; line-height: 1.5; }
+
+  .input-with-unit { position: relative; display: flex; align-items: center; }
+  .input-with-unit .field-input { padding-right: 52px; }
+  .input-unit {
+    position: absolute; right: 14px;
+    font-size: 13px; font-weight: 600; color: var(--text-muted);
+    pointer-events: none;
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;
+  }
+
+  .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .toggle-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+  .toggle-opt { position: relative; cursor: pointer; }
+  .toggle-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .toggle-label {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 8px; background: var(--input-bg);
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--text-dim); transition: all 0.2s; cursor: pointer;
+  }
+  .toggle-opt input:checked + .toggle-label { background: var(--yellow-glow); border-color: var(--yellow); color: var(--yellow); }
+  .toggle-opt.danger input:checked + .toggle-label { background: rgba(230,57,70,0.12); border-color: var(--red); color: var(--red); }
+
+  /* PHOTO UPLOAD */
+  .photo-upload-area {
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 22px 16px; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: var(--input-bg); position: relative;
+  }
+  .photo-upload-area:active { border-color: var(--yellow); background: var(--yellow-glow); }
+  .photo-upload-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .photo-upload-icon { color: var(--text-muted); margin-bottom: 8px; }
+  .photo-upload-icon svg { width: 32px; height: 32px; }
+  .photo-upload-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; font-weight: 700; color: var(--text-dim); letter-spacing: 0.5px;
+  }
+  .photo-upload-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+  .photo-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .photo-thumb {
+    position: relative; aspect-ratio: 1; border-radius: var(--radius-sm);
+    overflow: hidden; background: var(--input-bg); border: 1px solid var(--border);
+  }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-thumb-del {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(0,0,0,0.75); border: none; border-radius: 50%;
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #fff; padding: 0;
+  }
+  .photo-thumb-del svg { width: 12px; height: 12px; }
+
+  /* BUTTONS */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 16px 24px; border: none; border-radius: var(--radius);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.15s; -webkit-appearance: none;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 20px; height: 20px; }
+  .btn-primary { background: var(--yellow); color: var(--steel); box-shadow: 0 4px 20px rgba(245,197,24,0.3); }
+  .btn-primary:active { background: var(--yellow-dim); }
+  .btn-ghost { background: var(--steel-light); color: var(--text-dim); border: 1.5px solid var(--border); }
+
+  .form-actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    padding: 16px; background: var(--panel); border-top: 1px solid var(--border);
+    position: sticky; bottom: 0; z-index: 50;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .toast {
+    position: fixed; top: 80px; left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--green); color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 10px 20px; border-radius: 30px;
+    opacity: 0; transition: all 0.3s; z-index: 999;
+    pointer-events: none; white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(45,198,83,0.35);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--red); box-shadow: 0 4px 20px rgba(230,57,70,0.35); }
+
+  /* HISTORY */
+  .history-header {
+    padding: 14px 16px 10px; background: var(--panel);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50;
+  }
+  .search-wrap { position: relative; display: flex; align-items: center; }
+  .search-wrap svg { position: absolute; left: 12px; width: 18px; height: 18px; color: var(--text-muted); pointer-events: none; }
+  .search-input {
+    width: 100%; background: var(--input-bg);
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); font-family: 'Barlow', sans-serif;
+    font-size: 16px; padding: 11px 14px 11px 40px;
+    outline: none; -webkit-appearance: none; transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--yellow); }
+  .search-input::placeholder { color: var(--text-muted); }
+
+  .jobs-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; }
+  .empty-state svg { width: 56px; height: 56px; color: var(--border); margin: 0 auto 16px; display: block; }
+  .empty-state p { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px; }
+  .empty-state small { font-size: 14px; color: var(--text-muted); display: block; margin-top: 6px; }
+
+  /* JOB CARD */
+  .job-card { background: var(--steel-mid); border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s; }
+  .job-card-header {
+    padding: 14px 14px 10px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; cursor: pointer;
+  }
+  .job-card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 800; color: var(--text); line-height: 1.2; letter-spacing: 0.3px; }
+  .job-card-date { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+
+  .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .card-btn {
+    background: transparent; border: 1px solid var(--border); border-radius: 6px;
+    padding: 7px 10px; color: var(--text-dim); cursor: pointer;
+    display: flex; align-items: center;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+    gap: 5px; letter-spacing: 0.3px; transition: all 0.15s;
+  }
+  .card-btn svg { width: 15px; height: 15px; }
+  .card-btn:active { transform: scale(0.95); }
+  .card-btn.load { color: var(--yellow); border-color: var(--yellow-dim); }
+  .card-btn.delete { color: var(--red); border-color: rgba(230,57,70,0.3); }
+
+  .job-card-body { display: none; border-top: 1px solid var(--border); }
+  .job-card.expanded .job-card-body { display: block; }
+
+  /* CARD INNER TABS */
+  .card-tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .card-tab {
+    flex: 1; padding: 10px 6px; border: none; background: transparent;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+    color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .card-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+
+  .card-tab-pane { display: none; padding: 14px; }
+  .card-tab-pane.active { display: block; }
+
+  /* DETAILS PANE */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .summary-item { background: var(--input-bg); border-radius: var(--radius-sm); padding: 9px 11px; }
+  .summary-item.full { grid-column: 1 / -1; }
+  .summary-key { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
+  .summary-val { font-size: 15px; font-weight: 600; color: var(--text); word-break: break-word; line-height: 1.4; }
+  .rigger-yes { color: var(--yellow); }
+  .rigger-no { color: var(--text-dim); }
+
+  /* PHOTOS PANE */
+  .photos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .photo-card {
+    aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
+    background: var(--input-bg); border: 1px solid var(--border); cursor: pointer;
+  }
+  .photo-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photos-empty {
+    grid-column: 1 / -1; text-align: center; padding: 28px 0;
+    color: var(--text-muted); font-size: 14px;
+  }
+  .photos-empty svg { width: 34px; height: 34px; margin: 0 auto 10px; display: block; color: var(--border); }
+
+  /* LIGHTBOX */
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.93);
+    z-index: 500; display: none;
+    flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 100%; max-height: 82vh; border-radius: var(--radius); object-fit: contain; }
+  .lightbox-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.12); border: none; border-radius: 50%;
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    color: #fff; cursor: pointer; font-size: 20px; line-height: 1;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor">
+      <rect x="13" y="14" width="3" height="16" rx="1" fill="currentColor"/>
+      <rect x="4" y="6" width="24" height="2.5" rx="1.25" fill="currentColor"/>
+      <line x1="14.5" y1="8.5" x2="8" y2="25" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <rect x="5" y="5" width="3" height="22" rx="1" fill="currentColor"/>
+      <circle cx="24" cy="12" r="2.5" stroke="currentColor" stroke-width="2"/>
+      <line x1="24" y1="14.5" x2="24" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 2"/>
+    </svg>
+    <div class="app-title">Crane <span>Jobs</span></div>
+  </div>
+  <div class="job-count-badge" id="jobCountBadge">0 Jobs</div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" id="tabForm" onclick="switchTab('form')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    New Job
+  </button>
+  <button class="tab-btn" id="tabHistory" onclick="switchTab('history')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    History
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close">✕</button>
+  <img id="lightboxImg" src="" alt="Site photo">
+</div>
+
+<!-- FORM SCREEN -->
+<div class="screen active" id="screenForm">
+  <div class="form-body">
+
+    <div class="section-label">Job ID</div>
+    <div class="field-group">
+      <label class="field-label" for="customerName">Customer <span class="required">*</span></label>
+      <input class="field-input job-name-input" type="text" id="customerName" placeholder="e.g. Acme HVAC Services" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="siteAddress">Site Address <span class="required">*</span></label>
+      <input class="field-input job-name-input" type="text" id="siteAddress" placeholder="e.g. 123 Main St, Springfield" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+
+    <div class="section-label">Distances</div>
+    <div class="field-group">
+      <label class="field-label" for="centerpinDist">Centerpin to Building</label>
+      <div class="input-with-unit">
+        <input class="field-input" type="number" inputmode="decimal" id="centerpinDist" placeholder="0">
+        <span class="input-unit">ft</span>
+      </div>
+    </div>
+    <div class="field-row-2">
+      <div class="field-group">
+        <label class="field-label" for="buildingHeight">Building Height</label>
+        <div class="input-with-unit">
+          <input class="field-input" type="number" inputmode="decimal" id="buildingHeight" placeholder="0">
+          <span class="input-unit">ft</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="roofInset">In from Roof Edge</label>
+        <div class="input-with-unit">
+          <input class="field-input" type="number" inputmode="decimal" id="roofInset" placeholder="0">
+          <span class="input-unit">ft</span>
+        </div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="totalRadius">Total Radius <span style="color:var(--text-muted);font-weight:400;font-size:12px">(auto-calculated)</span></label>
+      <div class="input-with-unit">
+        <input class="field-input" type="number" id="totalRadius" placeholder="—" readonly tabindex="-1"
+          style="color:var(--yellow);font-weight:700;background:#161a10;border-color:var(--yellow-dim);cursor:default;">
+        <span class="input-unit">ft</span>
+      </div>
+    </div>
+
+    <div class="section-label">Load</div>
+    <div class="field-group">
+      <label class="field-label" for="loadWeight">Load Weight</label>
+      <div class="input-with-unit">
+        <input class="field-input" type="number" inputmode="decimal" id="loadWeight" placeholder="0">
+        <span class="input-unit">lbs</span>
+      </div>
+    </div>
+
+    <div class="section-label">Rigging</div>
+    <div class="field-group">
+      <label class="field-label" for="riggingNotes">Rigging Needed</label>
+      <textarea class="field-input" id="riggingNotes" placeholder="Describe rigging hardware, slings, shackles, spreader bars…" rows="3"></textarea>
+    </div>
+
+    <div class="section-label">Personnel</div>
+    <label class="field-label" style="margin-bottom:8px">Rigger / Flagman Needed</label>
+    <div class="toggle-group">
+      <label class="toggle-opt">
+        <input type="radio" name="riggerNeeded" value="Yes" id="riggerYes">
+        <span class="toggle-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M20 6L9 17l-5-5"/></svg>
+          Yes
+        </span>
+      </label>
+      <label class="toggle-opt danger">
+        <input type="radio" name="riggerNeeded" value="No" id="riggerNo">
+        <span class="toggle-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          No
+        </span>
+      </label>
+    </div>
+
+    <div class="section-label">Notes</div>
+    <div class="field-group">
+      <label class="field-label" for="setupNotes">Setup Notes</label>
+      <textarea class="field-input" id="setupNotes" placeholder="Overhead lines, permits, outrigger pads, site conditions, access…" rows="4"></textarea>
+    </div>
+
+    <div class="section-label">Photos</div>
+    <div class="photo-upload-area">
+      <input type="file" id="photoInput" accept="image/*" multiple onchange="handlePhotoInput(event)">
+      <div class="photo-upload-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <div class="photo-upload-text">Tap to add photos</div>
+      <div class="photo-upload-sub">Camera roll or take a new photo</div>
+    </div>
+    <div class="photo-preview-grid" id="photoPreviewGrid"></div>
+
+    <div style="height:20px"></div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="clearForm()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+      Clear
+    </button>
+    <button class="btn btn-primary" onclick="saveJob()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+      Save Job
+    </button>
+  </div>
+</div>
+
+<!-- HISTORY SCREEN -->
+<div class="screen" id="screenHistory">
+  <div class="history-header">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input class="search-input" type="text" id="searchInput" placeholder="Search jobs…" oninput="renderHistory()" autocomplete="off">
+    </div>
+  </div>
+  <div class="jobs-list" id="jobsList"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'craneJobs_v1';
+let pendingPhotos = [];
+
+// ── STORAGE ───────────────────────────────────────────────
+function loadJobs() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveJobs(jobs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+  updateBadge();
+}
+function updateBadge() {
+  const n = loadJobs().length;
+  document.getElementById('jobCountBadge').textContent = n === 1 ? '1 Job' : `${n} Jobs`;
+}
+
+// ── TABS ──────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('screenForm').classList.toggle('active', tab === 'form');
+  document.getElementById('screenHistory').classList.toggle('active', tab === 'history');
+  document.getElementById('tabForm').classList.toggle('active', tab === 'form');
+  document.getElementById('tabHistory').classList.toggle('active', tab === 'history');
+  if (tab === 'history') renderHistory();
+}
+
+// ── PHOTOS ────────────────────────────────────────────────
+function handlePhotoInput(e) {
+  Array.from(e.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => { pendingPhotos.push(ev.target.result); renderPendingPhotos(); };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function renderPendingPhotos() {
+  document.getElementById('photoPreviewGrid').innerHTML = pendingPhotos.map((src, i) => `
+    <div class="photo-thumb">
+      <img src="${src}" alt="Photo ${i+1}">
+      <button class="photo-thumb-del" onclick="removePhoto(${i})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function removePhoto(i) {
+  pendingPhotos.splice(i, 1);
+  renderPendingPhotos();
+}
+
+// ── FORM ──────────────────────────────────────────────────
+function getFormData() {
+  return {
+    id: Date.now(),
+    savedAt: new Date().toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }),
+    customerName: document.getElementById('customerName').value.trim(),
+    siteAddress:  document.getElementById('siteAddress').value.trim(),
+    centerpinDist: document.getElementById('centerpinDist').value.trim(),
+    buildingHeight: document.getElementById('buildingHeight').value.trim(),
+    roofInset:     document.getElementById('roofInset').value.trim(),
+    totalRadius:   document.getElementById('totalRadius').value.trim(),
+    loadWeight:    document.getElementById('loadWeight').value.trim(),
+    riggingNotes:  document.getElementById('riggingNotes').value.trim(),
+    riggerNeeded:  document.querySelector('input[name="riggerNeeded"]:checked')?.value || '—',
+    setupNotes:    document.getElementById('setupNotes').value.trim(),
+    photos: [...pendingPhotos],
+  };
+}
+
+function populateForm(job) {
+  document.getElementById('customerName').value  = job.customerName  || '';
+  document.getElementById('siteAddress').value   = job.siteAddress   || '';
+  document.getElementById('centerpinDist').value = job.centerpinDist || '';
+  document.getElementById('buildingHeight').value= job.buildingHeight|| '';
+  document.getElementById('roofInset').value     = job.roofInset     || '';
+  calcRadius();
+  document.getElementById('loadWeight').value    = job.loadWeight    || '';
+  document.getElementById('riggingNotes').value  = job.riggingNotes  || '';
+  document.getElementById('setupNotes').value    = job.setupNotes    || '';
+  if (job.riggerNeeded === 'Yes') document.getElementById('riggerYes').checked = true;
+  else if (job.riggerNeeded === 'No') document.getElementById('riggerNo').checked = true;
+  else { document.getElementById('riggerYes').checked = false; document.getElementById('riggerNo').checked = false; }
+  pendingPhotos = job.photos ? [...job.photos] : [];
+  renderPendingPhotos();
+}
+
+function clearForm() {
+  ['customerName','siteAddress','centerpinDist','buildingHeight','roofInset',
+   'totalRadius','loadWeight','riggingNotes','setupNotes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.querySelectorAll('input[name="riggerNeeded"]').forEach(r => r.checked = false);
+  pendingPhotos = [];
+  renderPendingPhotos();
+  document.getElementById('customerName').focus();
+}
+
+function saveJob() {
+  const data = getFormData();
+  if (!data.customerName || !data.siteAddress) {
+    showToast('Customer & Site Address required', 'error');
+    if (!data.customerName) document.getElementById('customerName').focus();
+    else document.getElementById('siteAddress').focus();
+    return;
+  }
+  try {
+    const jobs = loadJobs();
+    jobs.unshift(data);
+    saveJobs(jobs);
+    showToast('Job saved ✓');
+    clearForm();
+  } catch(e) {
+    showToast('Storage full — try fewer photos', 'error');
+  }
+}
+
+// ── RADIUS ────────────────────────────────────────────────
+function calcRadius() {
+  const a = parseFloat(document.getElementById('centerpinDist').value) || 0;
+  const b = parseFloat(document.getElementById('roofInset').value) || 0;
+  document.getElementById('totalRadius').value = (a || b) ? (a + b) : '';
+}
+document.getElementById('centerpinDist').addEventListener('input', calcRadius);
+document.getElementById('roofInset').addEventListener('input', calcRadius);
+
+// ── HISTORY ───────────────────────────────────────────────
+function renderHistory() {
+  const jobs = loadJobs();
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const list = q ? jobs.filter(j =>
+    (j.customerName||'').toLowerCase().includes(q) ||
+    (j.siteAddress||'').toLowerCase().includes(q) ||
+    (j.setupNotes||'').toLowerCase().includes(q)
+  ) : jobs;
+
+  const container = document.getElementById('jobsList');
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 17H7A5 5 0 017 7h2M15 7h2a5 5 0 010 10h-2M8 12h8"/>
+      </svg>
+      <p>${jobs.length ? 'No results found' : 'No jobs saved yet'}</p>
+      <small>${jobs.length ? 'Try a different search term' : 'Tap New Job to get started'}</small>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(job => {
+    const photoCount = (job.photos||[]).length;
+    return `
+    <div class="job-card" id="card-${job.id}">
+      <div class="job-card-header" onclick="toggleCard(${job.id})">
+        <div>
+          <div class="job-card-title">${escHtml(job.customerName)}</div>
+          <div class="job-card-date" style="color:var(--text-dim);font-size:13px;font-weight:600;margin-top:2px">${escHtml(job.siteAddress)}</div>
+          <div class="job-card-date">${job.savedAt}${photoCount ? ` &nbsp;·&nbsp; 📷 ${photoCount}` : ''}</div>
+        </div>
+        <div class="card-actions">
+          <button class="card-btn load" onclick="event.stopPropagation();loadJob(${job.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Load
+          </button>
+          <button class="card-btn delete" onclick="event.stopPropagation();deleteJob(${job.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="job-card-body">
+        <div class="card-tabs">
+          <button class="card-tab active" onclick="switchCardTab(${job.id},'details',this)">Details</button>
+          <button class="card-tab"        onclick="switchCardTab(${job.id},'photos',this)">Photos${photoCount ? ` (${photoCount})` : ''}</button>
+        </div>
+
+        <div class="card-tab-pane active" id="pane-details-${job.id}">
+          <div class="summary-grid">
+            ${si('Customer', job.customerName, '', true)}
+            ${si('Site Address', job.siteAddress, '', true)}
+            ${si('Centerpin → Building', job.centerpinDist ? job.centerpinDist+' ft' : '—')}
+            ${si('Building Height', job.buildingHeight ? job.buildingHeight+' ft' : '—')}
+            ${si('In from Roof Edge', job.roofInset ? job.roofInset+' ft' : '—')}
+            ${si('Total Radius', job.totalRadius ? job.totalRadius+' ft' : '—')}
+            ${si('Load Weight', job.loadWeight ? job.loadWeight+' lbs' : '—')}
+            ${si('Rigger / Flagman', job.riggerNeeded, job.riggerNeeded==='Yes'?'rigger-yes':'rigger-no')}
+            ${job.riggingNotes ? si('Rigging', job.riggingNotes, '', true) : ''}
+            ${job.setupNotes   ? si('Setup Notes', job.setupNotes, '', true) : ''}
+          </div>
+        </div>
+
+        <div class="card-tab-pane" id="pane-photos-${job.id}">
+          <div class="photos-grid">
+            ${photoCount
+              ? (job.photos||[]).map((src,i)=>`
+                  <div class="photo-card" onclick="openLightbox('${job.id}',${i})">
+                    <img src="${src}" alt="Photo ${i+1}" loading="lazy">
+                  </div>`).join('')
+              : `<div class="photos-empty">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                  No photos attached to this job
+                </div>`
+            }
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function switchCardTab(jobId, tab, btn) {
+  ['details','photos'].forEach(t => {
+    document.getElementById(`pane-${t}-${jobId}`)?.classList.toggle('active', t === tab);
+  });
+  btn.closest('.card-tabs').querySelectorAll('.card-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function si(key, val, cls='', full=false) {
+  return `<div class="summary-item${full?' full':''}">
+    <div class="summary-key">${key}</div>
+    <div class="summary-val${cls?' '+cls:''}">${escHtml(val||'—')}</div>
+  </div>`;
+}
+
+function toggleCard(id) { document.getElementById('card-'+id)?.classList.toggle('expanded'); }
+
+function loadJob(id) {
+  const job = loadJobs().find(j => j.id === id);
+  if (!job) return;
+  populateForm(job);
+  switchTab('form');
+  showToast('Job loaded into form');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteJob(id) {
+  if (!confirm('Delete this job? This cannot be undone.')) return;
+  saveJobs(loadJobs().filter(j => j.id !== id));
+  renderHistory();
+  showToast('Job deleted');
+}
+
+// ── LIGHTBOX ──────────────────────────────────────────────
+function openLightbox(jobId, index) {
+  const job = loadJobs().find(j => j.id == jobId);
+  if (!job?.photos) return;
+  document.getElementById('lightboxImg').src = job.photos[index];
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+document.getElementById('lightbox').addEventListener('click', closeLightbox);
+
+// ── TOAST ─────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type==='error'?' error':'');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.className='toast'; }, 2400);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+updateBadge();
+</script>
+</body>
+</html>
